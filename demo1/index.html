@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo 1</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    .test-button {
+      outline: none;
+      margin: 0;
+      padding: 0;
+      border: none;
+      color: transparent;
+      /* 这个必须在上面 */
+      background: linear-gradient(to right, #fff 0%, #000 100%); 
+      -webkit-background-clip: text;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container"></div>
+</body>
+<script src="./../libs/react@16.14.0.js"></script>
+<script src="./../libs/react-dom@16.14.0.js"></script>
+<script>
+  const button = React.createElement(
+    'button', // 标签
+    { // props
+      className: 'test-button', // 使用class或className都行
+      onClick: (e) => { console.log(e) }
+    },
+    'Button', // 内容
+  )
+  ReactDOM.render(
+    button,
+    document.getElementById('container')
+  )
+</script>
+
+</html>

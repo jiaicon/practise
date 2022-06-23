@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo 2</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+</body>
+<script src="./../libs/react@16.14.0.js"></script>
+<script src="./../libs/react-dom@16.14.0.js"></script>
+<script src="./../libs/babel-standalone@6.26.0.min.js"></script>
+<script src="./main.js" type="text/babel"></script>
+<script type="text/babel">
+
+  const container = document.getElementById('root');
+  ReactDOM.render(
+    <Index />,
+    container
+  )
+</script>
+
+</html>
