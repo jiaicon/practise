@@ -9,3 +9,4 @@
 | master | 主分支 |
 | apng | APNG使用 |
 | react-study | React 日常联系 |
+| umi-study | UmiJS 日常联系 |
