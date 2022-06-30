@@ -9,4 +9,4 @@
 | master | 主分支 |
 | apng | apng的用法 |
 | threejs-study | threejs学习 |
-| sockrt | websocket学习，聊天室 |
+| socket | websocket学习，聊天室 |
