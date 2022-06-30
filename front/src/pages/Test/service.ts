@@ -1,6 +1,6 @@
 import request from '@/utils/request';
 import { IResponse } from '../../vite-env';
-import { TestData, GetTestDataParams } from './data';
+import type { TestData, GetTestDataParams } from './data';
 
 export async function getTestData(params?: GetTestDataParams | null): Promise<IResponse.Response<TestData>> {
   return request.get('/api/data', {

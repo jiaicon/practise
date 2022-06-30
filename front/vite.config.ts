@@ -1,21 +1,22 @@
 import { defineConfig } from "vite";
 import reactRefresh from "@vitejs/plugin-react-refresh";
 import styleImport from "vite-plugin-style-import";
+const path = require('path');
 
 // https://vitejs.dev/config/
 export default defineConfig({
   resolve: {
     alias: [
-      // Resolve tsconfig paths
-      { find: "@", replacement: "/src" },
-      // Trim leading tilde in less files
-      { find: /^~/, replacement: "" },
-    ],
+      {
+        find: "@",
+        replacement: path.resolve(__dirname, 'src')
+      }
+    ]
   },
 
   build: {
     polyfillDynamicImport: false,
-
+    outDir: path.join(__dirname, './../server/front'),
     rollupOptions: {
       output: {
         // Don't generate vendor bundle

@@ -1,0 +1,1 @@
+import{R as e,S as n}from"./arco-design.a1af654c.js";import{L as t}from"./index.bdc22923.js";/* empty css               */const c=a=>(console.log(a),e.createElement("div",null,e.createElement("h1",null,"React-Router-dom"),e.createElement(n,null,e.createElement(t,{to:"app"},"App"),e.createElement(t,{to:"test"},"Test"))));export{c as default};

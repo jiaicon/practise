@@ -1,7 +1,7 @@
-interface TestData {
+export interface TestData {
 
 }
 
-interface GetTestDataParams {
+export interface GetTestDataParams {
   
 }
