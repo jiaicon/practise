@@ -1,0 +1,20 @@
+{
+  "name": "server-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./index.js",
+    "start-express": "node ./express.js",
+    "start-socket": "node ./socket.js",
+    "start-socket-io": "node ./socket-io.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.1",
+    "nodejs-websocket": "^1.7.2",
+    "socket.io": "^4.5.1"
+  }
+}
