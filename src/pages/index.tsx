@@ -1,13 +1,23 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import yayJpg from '@assets/yay.jpg';
 import { useClientLoaderData } from 'umi';
+import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
 export default function HomePage() {
+  const [visitorId, setVisitorId] = useState<string>();
   const data = useClientLoaderData();
-  console.log(data);
+  const fpPromise = FingerprintJS.load();
+  const getId = async () => {
+    const fp = await fpPromise
+    const result = await fp.get()
+    setVisitorId(result.visitorId)
+  }
+  useEffect(() => {
+    getId();
+  }, [])
   return (
     <div>
-      <h2>Yay! Welcome to umi!</h2>
+      <h2>visitorId: {visitorId}</h2>
       <p>
         <img src={yayJpg} width="388" />
       </p>

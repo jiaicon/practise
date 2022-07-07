@@ -1,1 +1,1 @@
-
+import './global.module.less';
