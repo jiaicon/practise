@@ -17,97 +17,14 @@
 </head>
 
 <body>
-
+<div class="main-container"></div>
 </body>
+<script src="./../lib/js/jquery.min.js"></script>
+<script src="./TweenLite.min.js"></script>
 <script src="./../lib/js/three.js"></script>
 <script src="./../lib/js/GLTFLoader.js"></script>
 <script src="./../lib/js/OrbitControls.js"></script>
-<script>
-  const width = window.innerWidth;
-  const height = window.innerHeight;
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(45, width / height, 1, 999);
-
-  const light = new THREE.PointLight(0xffffff, 1);
-  light.position.set(0, 0, 500);
-  light.castShadow = true;
-  scene.add(light);
-
-  const renderer = new THREE.WebGLRenderer({
-    antialias: true,
-    alpha: true,
-  });
-  renderer.shadowMap.enabled = true;
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  document.body.appendChild(renderer.domElement);
-
-  // const geometry = new THREE.BoxGeometry(1, 1, 1);
-  // const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-  // const cube = new THREE.Mesh(geometry, material);
-  // scene.add(cube);
-
-  camera.position.z = 500;
-
-  const loader = new THREE.GLTFLoader();
-  function render() {
-    renderer.render(scene, camera);
-  }
-  render();
-
-  function initBall() {
-    // 纹理贴图
-    let textureLoader = new THREE.TextureLoader();
-    textureLoader.load('./imgs/map.jpg', function (texture) {
-      // 创建球
-      let geometry = new THREE.SphereGeometry(70, 100, 100);
-      let material = new THREE.MeshBasicMaterial({
-        map: texture, //设置颜色贴图属性值
-      });
-      //网格模型对象Mesh
-      mesh = new THREE.Mesh(geometry, material);
-      // 唯一标识
-      mesh.name = "ballMain";
-      mesh.castShadow = true;
-      // 添加到场景中
-      scene.add(mesh);
-    });
-  }
-
-  initBall();
-
-  function initPlane() {
-    const planeGeometry = new THREE.PlaneGeometry(500, 500, 10, 10);
-    const planeMaterial = new THREE.MeshLambertMaterial({ color: 0x00ffff, side: THREE.DoubleSide });
-    const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-    plane.rotation.x = -0.5 * Math.PI;
-    plane.position.y = -100;
-    scene.add(plane);
-    plane.receiveShadow = true;
-  }
-
-  initPlane();
-
-  const controls = new THREE.OrbitControls(camera, renderer.domElement);
-  controls.minDistance = 2;
-  controls.maxDistance = 99999;
-
-  function onWindowResize() {
-
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-
-    renderer.setSize(window.innerWidth, window.innerHeight);
-
-    render();
-
-  }
-  window.addEventListener('resize', onWindowResize);
-  function animate() {
-    requestAnimationFrame(animate);
-    renderer.render(scene, camera);
-  }
-
-  animate();
-</script>
-
+<script src="./../lib/js/EffectComposer.js"></script>
+<script src="./detector.js"></script>
+<script src="./main.js"></script>
 </html>
