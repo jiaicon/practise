@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    html,
+    body {
+      padding: 0;
+      margin: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container"></div>
+</body>
+<script type="module">
+  import Icon from './Icon.js';
+
+  const earth = new Icon.Earth({
+    cloud: true,
+    rotation: false,
+  })
+
+  const point = [[113.6298317, 34.7536593], [75.059, 38.445]];
+  const pointFeature = new Icon.Point({
+    dataset: point
+  })
+  earth.addFeature(pointFeature);
+
+  const lineFeature = new Icon.Line({
+    feature: point
+  })
+  earth.addFeature(lineFeature);
+</script>
+
+</html>
