@@ -22,7 +22,7 @@ class Line extends Feature {
     // 使用QuadraticBezierCurve3() 创建 三维二次贝塞尔曲线
     const curve = new THREE.QuadraticBezierCurve3(
       posStart,
-      {...center, y: center.y * 1.43, x: center.x * 1.43},
+      {...center, y: center.y * 1.43, x: center.x * 1.25},
       posEnd
     )
 

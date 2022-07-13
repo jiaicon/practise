@@ -18,7 +18,6 @@ class Earth extends Event {
     this.rotation = options.rotation || false;
     this.cloud = options.cloud || false;
     this.showAxes = options.showAxes || false;
-    this.allMesh = new THREE.Group();
 
     this.init();
   }
@@ -89,7 +88,13 @@ class Earth extends Event {
     });
 
     this.earthMesh = new THREE.Mesh(earthGeometry, earthMaterial);
+    this.earthMesh.name = 'earth';
     this.earthMesh.rotation.y = -(Math.PI / 2).toFixed(2);
+
+    // 保存地球的所有物体
+    this.allMesh = new THREE.Group();
+    this.allMesh.name = 'allMesh'
+
     this.allMesh.add(this.earthMesh);
     this.addAllMesh();
     if (this.cloud) {
@@ -107,10 +112,10 @@ class Earth extends Event {
       opacity: 0.2,
     })
     this.cloudMesh = new THREE.Mesh(cloudGeometry, cloudMaterial);
+    this.cloudMesh.name = 'cloud';
     this.scene.add(this.cloudMesh);
   }
   addAllMesh() {
-    console.log(this.allMesh);
     this.scene.add(this.allMesh);
   }
   addFeature(feature) {
@@ -131,12 +136,15 @@ class Earth extends Event {
     }, 200)
   }
   addPoint(feature) {
+    feature.mesh.name = 'testPoint';
     this.allMesh?.add(feature.mesh);
   }
   addLine(feature) {
+    feature.mesh.name = 'testLine';
     this.allMesh?.add(feature.mesh);
   }
   addPolygon(feature) {
+    feature.mesh.name = 'chinaMap';
     this.allMesh?.add(feature.mesh);
   }
 
