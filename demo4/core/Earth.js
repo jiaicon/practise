@@ -2,6 +2,7 @@ import EarthParams from './EarthParams.js';
 import * as THREE from './../../node_modules/three/build/three.module.js';
 import { OrbitControls } from './../../node_modules/three/examples/jsm/controls/OrbitControls.js';
 import FeatureType from './FeatureType.js';
+import Event from './Event.js';
 
 const earth_img = '/demo4/assets/earth2.jpg';
 const galaxy_img = '/demo4/assets/galaxy.png';
@@ -10,11 +11,14 @@ const { EARTH_RADIUS, SHRINK_SCALE } = EarthParams;
 /**
  * Earth
  */
-class Earth {
+class Earth extends Event {
   constructor(options = {}) {
+    super();
+
     this.rotation = options.rotation || false;
     this.cloud = options.cloud || false;
     this.showAxes = options.showAxes || false;
+    this.allMesh = new THREE.Group();
 
     this.init();
   }
@@ -35,10 +39,11 @@ class Earth {
 
       // 执行动画并渲染
       this.animate();
+      // 监听事件
+      this.addEarthEvent();
     })
   }
   initRenderer() {
-    this.container = document.querySelector('#container');
     this.container.setAttribute('style', `
       border: none;
       cursor: pointer;
@@ -49,7 +54,7 @@ class Earth {
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true,
-      canvas: this.renderer
+      canvas: this.renderer,
     });
     this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
     this.container.appendChild(this.renderer.domElement);
@@ -80,19 +85,17 @@ class Earth {
     const earthGeometry = new THREE.SphereGeometry(EARTH_RADIUS * SHRINK_SCALE, 40, 30);
     const earthMaterial = new THREE.MeshPhongMaterial({
       map: new THREE.TextureLoader().load(earth_img),
-      side: THREE.DoubleSide
+      side: THREE.DoubleSide,
     });
 
     this.earthMesh = new THREE.Mesh(earthGeometry, earthMaterial);
     this.earthMesh.rotation.y = -(Math.PI / 2).toFixed(2);
-    this.scene.add(this.earthMesh);
-
+    this.allMesh.add(this.earthMesh);
+    this.addAllMesh();
     if (this.cloud) {
       this.createCloud();
     }
 
-    // 点数组
-    this.featureMeshes = [];
   }
   createCloud() {
     // 创建包裹地球的云
@@ -106,41 +109,47 @@ class Earth {
     this.cloudMesh = new THREE.Mesh(cloudGeometry, cloudMaterial);
     this.scene.add(this.cloudMesh);
   }
+  addAllMesh() {
+    console.log(this.allMesh);
+    this.scene.add(this.allMesh);
+  }
   addFeature(feature) {
     let featureType = feature.type;
-    console.log(feature)
-    switch (featureType) {
-      case FeatureType.POINT:
-        this.addPoint(feature);
-        break;
-      case FeatureType.LINE:
-        this.addLine(feature);
-        break;
-    }
+    setTimeout(() => {
+      // 为避免差异，这里每个方法单独调用
+      switch (featureType) {
+        case FeatureType.POINT:
+          this.addPoint(feature);
+          break;
+        case FeatureType.LINE:
+          this.addLine(feature);
+          break;
+        case FeatureType.POLYGON:
+          this.addPolygon(feature);
+          break;
+      }
+    }, 200)
   }
   addPoint(feature) {
-    setTimeout(() => {
-      this.scene.add(feature.mesh);
-      this.featureMeshes.push(feature.mesh);
-    }, 200)
+    this.allMesh?.add(feature.mesh);
   }
   addLine(feature) {
-    setTimeout(() => {
-      this.scene.add(feature.mesh);
-      // this.featureMeshes.push(feature.mesh);
-    }, 200)
+    this.allMesh?.add(feature.mesh);
   }
-  updateFetures() {
-    this.featureMeshes.forEach(mesh => {
-      mesh.rotation.y -= 0.0015;
-    })
+  addPolygon(feature) {
+    this.allMesh?.add(feature.mesh);
+  }
+
+  updateFetures(rotate) {
+    if (!rotate) {
+      this.allMesh.rotation.y -= 0.0015;
+    }
   }
   render() {
     this.renderer.render(this.scene, this.camera);
   }
   animate() {
     if (this.rotation) {
-      this.earthMesh && (this.earthMesh.rotation.y -= 0.0015);
       this.cloudMesh && (this.cloudMesh.rotation.y += 0.002);
       this.updateFetures();
     }

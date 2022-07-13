@@ -13,9 +13,6 @@ class Line extends Feature {
     const posStart = CoordinateTransform.cartographicToXYZ(feature[0][0], feature[0][1]);
     const posEnd = CoordinateTransform.cartographicToXYZ(feature[1][0], feature[1][1]);
 
-    const { x: x0, y: y0, z: z0 } = posStart;
-    const { x: x1, y: y1, z: z1 } = posEnd;
-
     const line3 = new THREE.Line3();
     line3.start = posStart;
     line3.end = posEnd;
@@ -25,8 +22,7 @@ class Line extends Feature {
     // 使用QuadraticBezierCurve3() 创建 三维二次贝塞尔曲线
     const curve = new THREE.QuadraticBezierCurve3(
       posStart,
-      // { x: (x0 + x1) / 2, y: (y0 + y1) / 2 + 2, z: (z0 + z1) / 2 },
-      center,
+      {...center, y: center.y * 1.43, x: center.x * 1.43},
       posEnd
     )
 
@@ -48,8 +44,8 @@ class Line extends Feature {
       positions.push(points[j].x, points[j].y, points[j].z)
     }
     // 放入顶点 和 设置顶点颜色
-    lineGeometry.addAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3, true))
-    lineGeometry.addAttribute('color', new THREE.BufferAttribute(new Float32Array(colors), 3, true))
+    lineGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3, true))
+    lineGeometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(colors), 3, true))
 
     const material = new THREE.LineBasicMaterial({ vertexColors: THREE.VertexColors, side: THREE.DoubleSid })
     this.mesh = new THREE.Line(lineGeometry, material)

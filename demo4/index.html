@@ -18,12 +18,13 @@
 <body>
   <div id="container"></div>
 </body>
+<script src="./../node_modules/axios/dist/axios.js"></script>
 <script type="module">
   import Icon from './Icon.js';
 
   const earth = new Icon.Earth({
     cloud: true,
-    rotation: false,
+    rotation: true,
   })
 
   const point = [[113.6298317, 34.7536593], [75.059, 38.445]];
@@ -36,6 +37,20 @@
     feature: point
   })
   earth.addFeature(lineFeature);
+
+  // 中国地理位置
+  axios.get('./assets/china.json')
+    .then(res => {
+      const features = res.data.features;
+      const polygon = new Icon.Polygon({
+        data: features,
+        color: (value) => {
+          return value === '河南省' ? 0xfff000 : 0xffffff;
+        },
+      })
+
+      earth.addFeature(polygon);
+    })
 </script>
 
 </html>
