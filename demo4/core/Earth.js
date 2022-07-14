@@ -13,7 +13,9 @@ const { EARTH_RADIUS, SHRINK_SCALE } = EarthParams;
  */
 class Earth extends Event {
   constructor(options = {}) {
-    super();
+    super({
+      stopRotationObjects: ['earth', 'cloud', 'allMesh']
+    });
 
     this.rotation = options.rotation || false;
     this.cloud = options.cloud || false;
@@ -78,6 +80,8 @@ class Earth extends Event {
   }
   initControll() {
     this.orbitControls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.orbitControls.enableDamping = true
+    this.orbitControls.zoomSpeed = 1
     this.renderer.clear();
   }
   initEarth() {
@@ -132,6 +136,9 @@ class Earth extends Event {
         case FeatureType.POLYGON:
           this.addPolygon(feature);
           break;
+        case FeatureType.BREATHPOINT:
+          this.addBreathPoint(feature);
+          break;
       }
     }, 200)
   }
@@ -147,6 +154,11 @@ class Earth extends Event {
     feature.mesh.name = 'chinaMap';
     this.allMesh?.add(feature.mesh);
   }
+  addBreathPoint(feature) {
+    feature.mesh.name = 'breathPoint';
+    this.allMesh?.add(feature.mesh);
+    this.addAllMesh();
+  }
 
   updateFetures(rotate) {
     if (!rotate) {
@@ -161,6 +173,7 @@ class Earth extends Event {
       this.cloudMesh && (this.cloudMesh.rotation.y += 0.002);
       this.updateFetures();
     }
+    this.orbitControls.update();
     this.render();
     requestAnimationFrame(this.animate.bind(this));
   }

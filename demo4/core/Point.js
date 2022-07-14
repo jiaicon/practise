@@ -67,30 +67,29 @@ class Point extends Feature {
       });
     }
 
-    let point = new THREE.Points(geometry, material);
-    point.lookAt(new THREE.Vector3(0, 0, 0))
+    const point = new THREE.Points(geometry, material);
 
     return point;
   }
 
   createCirclePoint() {
-    let canvas = document.createElement("canvas");
+    const canvas = document.createElement("canvas");
     canvas.width = 100;
     canvas.height = 100;
 
-    let context = canvas.getContext("2d");
+    const context = canvas.getContext("2d");
     context.fillStyle = "#fffa32";
 
     context.arc(50, 50, 45, 0, 2 * Math.PI);
     context.fill();
 
-    let texture = new THREE.Texture(canvas);
+    const texture = new THREE.Texture(canvas);
 
     texture.needsUpdate = true;
 
-    let geometry = new THREE.BufferGeometry();
+    const geometry = new THREE.BufferGeometry();
 
-    let pxyz_arr = [];
+    const pxyz_arr = [];
     for (let i = 0; i < this.dataset.length; i++) {
       let pcoor = this.dataset[i];
       let pxyz = CoordinateTransform.cartographicToXYZ(pcoor[0], pcoor[1], this.ingoreAlt ? 0 : pcoor[2]);
