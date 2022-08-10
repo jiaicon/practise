@@ -52,6 +52,20 @@
       earth.addFeature(polygon);
     })
 
+  // 世界地理位置
+  // axios.get('./assets/word.json')
+  //   .then(res => {
+  //     const features = res.data.features;
+  //     const polygon = new Icon.Polygon({
+  //       data: features,
+  //       color: (value) => {
+  //         return value === '河南省' ? 0xfff000 : 0xffffff;
+  //       },
+  //     })
+
+  //     earth.addFeature(polygon);
+  //   })
+
   // 呼吸点
   const breathPoint = new Icon.BreathPoint({
     color: 0x0000ff,

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>three.js webgl - mirror</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  <link type="text/css" rel="stylesheet" href="./main.css">
+  <style>
+    html,
+    body {
+      height: 100%;
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container" style="width:100%;height:100vh;position:relative; overflow: hidden;"></div>
+  </div>
+  <script type="module">
+    import * as THREE from './../node_modules/three/build/three.module.js';
+    import { OrbitControls } from './../node_modules/three/examples/jsm/controls/OrbitControls.js';
+    import { VRButton } from './../node_modules/three/examples/jsm/webxr/VRButton.js';
+
+    let renderer, camera, scene, light, controls;
+    const Dom = document.querySelector('#container');
+    const width = Dom.clientWidth, height = Dom.clientHeight;
+    /**
+     * @description 初始化渲染场景
+     */
+    function initRenderer() {
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(width, height);
+      const containerDom = document.querySelector('#container');
+      containerDom.appendChild(renderer.domElement);
+      renderer.xr.enabled = true;
+
+      // VR按钮
+      document.body.appendChild(VRButton.createButton(renderer));
+    }
+    /**
+     * @description 初始化相机
+     */
+    function initCamera() {
+      camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
+      camera.position.set(0.8, -5, 0.8);
+      camera.lookAt(0, 3, 0);
+      window.camera = camera;
+    }
+    /**
+     * @description 初始化场景
+     */
+    function initScene() {
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x020924);
+      scene.fog = new THREE.Fog(0x020924, 200, 1000);
+      window.scene = scene;
+    }
+    /**
+     * 初始化用户交互
+     **/
+    function initControls() {
+      controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.enableZoom = true;
+      controls.autoRotate = false;
+      controls.autoRotateSpeed = 2;
+      controls.enablePan = true;
+    }
+    /**
+     * @description 初始化光
+     */
+    function initLight() {
+      const ambientLight = new THREE.AmbientLight(0xcccccc, 1.1);
+      scene.add(ambientLight);
+      var directionalLight = new THREE.DirectionalLight(0xffffff, 0.2);
+      directionalLight.position.set(1, 0.1, 0).normalize();
+      var directionalLight2 = new THREE.DirectionalLight(0xff2ffff, 0.2);
+      directionalLight2.position.set(1, 0.1, 0.1).normalize();
+      scene.add(directionalLight);
+      scene.add(directionalLight2);
+      var hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.2);
+      hemiLight.position.set(0, 1, 0);
+      scene.add(hemiLight);
+      var directionalLight = new THREE.DirectionalLight(0xffffff);
+      directionalLight.position.set(1, 500, - 20);
+      directionalLight.castShadow = true;
+      directionalLight.shadow.camera.top = 18;
+      directionalLight.shadow.camera.bottom = - 10;
+      directionalLight.shadow.camera.left = - 52;
+      directionalLight.shadow.camera.right = 12;
+      scene.add(directionalLight);
+    }
+    /**
+     * 窗口变动
+     **/
+    function onWindowResize() {
+      camera.aspect = innerWidth / innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight);
+      renders();
+    }
+
+    /**
+     * @description 渲染
+     */
+    function renders() {
+      renderer.clear();
+      renderer.render(scene, camera);
+    }
+
+    /**
+     * 更新
+     **/
+    function animate() {
+      // window.requestAnimationFrame(() => {
+      //   if (controls) controls.update();
+      //   renders();
+      //   animate();
+      // });
+      renderer.setAnimationLoop(function () {
+        if (controls) controls.update();
+        renders();
+      });
+    }
+
+    /**
+     * 初始化背景
+    */
+    function initBg() {
+      const positions = [];
+      const colors = [];
+      const geometry = new THREE.BufferGeometry();
+      // 生产1000个点
+      for (var i = 0; i < 10000; i++) {
+        var vertex = new THREE.Vector3();
+        vertex.x = Math.random() * 2 - 1;
+        vertex.y = Math.random() * 2 - 1;
+        vertex.z = Math.random() * 2 - 1;
+        positions.push(vertex.x, vertex.y, vertex.z);
+        var color = new THREE.Color();
+        color.setHSL(Math.random() * 0.2 + 0.5, 0.55, Math.random() * 0.25 + 0.55);
+        colors.push(color.r, color.g, color.b);
+      }
+      geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+      geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+
+      const size = 10;
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      ctx.arc(size / 2, size / 2, size / 2, 0, 2 + Math.PI);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fill();
+
+      const starsMaterial = new THREE.PointsMaterial({
+        size: 0.01,
+        vertexColors: true,
+        map: new THREE.CanvasTexture(canvas),
+      });
+      const mesh = new THREE.Points(geometry, starsMaterial);
+      scene.add(mesh);
+    }
+
+    /**
+     * 初始化地球
+     * 
+    */
+    function initEarth() {
+      const initialPoints = [
+        { x: 1, y: 1, z: -1 },
+        { x: 1, y: 0, z: 1 },
+        { x: -1, y: 0, z: 1 },
+        { x: -1, y: 0, z: -1 }
+      ];
+
+      const addCube = (pos) => {
+        const geometry = new THREE.BoxBufferGeometry(0.1, 0.1, 0.1);
+        const material = new THREE.MeshBasicMaterial(0xffffff);
+        const cube = new THREE.Mesh(geometry, material);
+        cube.position.copy(pos);
+        scene.add(cube);
+        return cube;
+      }
+
+      const cubeList = initialPoints.map(pos => {
+        return addCube(pos);
+      });
+
+      const curve = new THREE.CatmullRomCurve3(
+        cubeList.map((cube) => cube.position) // 直接绑定方块的position以便后续用方块调整曲线
+      );
+      curve.curveType = 'chordal'; // 曲线类型
+      curve.closed = true; // 曲线是否闭合
+
+      const points = curve.getPoints(50); // 50等分获取曲线点数组
+      const line = new THREE.LineLoop(
+        new THREE.BufferGeometry().setFromPoints(points),
+        new THREE.LineBasicMaterial({ color: 0x00ff00 })
+      ); // 绘制实体线条，仅用于示意曲线，后面的向量线条同理，相关代码就省略了
+
+      scene.add(line);
+
+      const geometry = new THREE.BoxBufferGeometry(0.1, 0.1, 0.3);
+      const material = new THREE.MeshBasicMaterial({
+        color: 'red',
+        side: THREE.Double,
+      })
+
+      const mesh = new THREE.Mesh(geometry, material);
+
+      scene.add(mesh);
+
+      function changePosition(t) {
+        const position = curve.getPointAt(t); // t: 当前点在线条上的位置百分比，后面计算
+        mesh.position.copy(position);
+      }
+
+      function changeLookAt(t) {
+        const position = curve.getPointAt(t);
+        const tangent = curve.getTangentAt(t);
+        const lookAtVec = tangent.add(position); // 位置向量和切线向量相加即为所需朝向的点向量
+        mesh.lookAt(lookAtVec);
+        camera.position.set(position.x, position.y + 1.5, position.z);
+        camera.lookAt(lookAtVec);
+      }
+
+      const loopTime = 10 * 1000; // loopTime: 循环一圈的时间
+
+      // 在渲染函数中获取当前时间
+      const render = () => {
+        let time = Date.now();
+        let t = (time % loopTime) / loopTime; // 计算当前时间进度百分比
+
+        changePosition(t);
+        changeLookAt(t);
+
+        requestAnimationFrame(render);
+        renderer.render(scene, camera);
+      }
+
+      requestAnimationFrame(render);
+    }
+
+
+
+    window.onload = () => {
+      initRenderer();
+      initCamera();
+      initScene();
+      initLight();
+      initControls();
+      initBg();
+      animate();
+      initEarth();
+      window.addEventListener('resize', onWindowResize, false);
+    };
+  </script>
+</body>
+
+</html>

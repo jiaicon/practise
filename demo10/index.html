@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #container {
+      width: 100%;
+      height: 100%;
+      background-color: #000;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container"></div>
+</body>
+<script type="module">
+  import * as THREE from './../node_modules/three/build/three.module.js';
+  import * as OrbitControls from './../node_modules/three/examples/jsm/controls/OrbitControls.js';
+
+  let scene, renderer, camera, light, orbitControls;
+  const winWidth = window.innerWidth;
+  scene = new THREE.Scene();
+
+  const container = document.querySelector('#container');
+  renderer = new THREE.WebGlRenderer()
+  renderer.setClearColor(0x000000);
+  renderer.setSize();
+
+</script>
+
+</html>

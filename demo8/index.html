@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>向量</title>
+  <style>
+    html,
+    body {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    .css3Renderer {
+      top: 0;
+      left: 0;
+      position: absolute;
+      pointer-events: none;
+    }
+
+    .span {
+      pointer-events: none !important;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container" style="width:100%;height:100vh;position:relative; overflow: hidden;"></div>
+</body>
+<script type="module">
+  import * as THREE from './../node_modules/three/build/three.module.js';
+  import { OrbitControls } from './../node_modules/three/examples/jsm/controls/OrbitControls.js';
+  import { CSS3DRenderer, CSS3DSprite } from './../node_modules/three/examples/jsm/renderers/CSS3DRenderer.js';
+  let renderer, css3dRenderer, camera, scene, light, controls, axes;
+  let lineGeometry;
+  const Dom = document.querySelector('#container');
+  const width = Dom.clientWidth, height = Dom.clientHeight;
+  /**
+   * @description 初始化渲染场景
+   */
+  function initRenderer() {
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(width, height);
+    css3dRenderer = new CSS3DRenderer();
+    css3dRenderer.setSize(width, height);
+    const containerDom = document.querySelector('#container');
+    containerDom.appendChild(renderer.domElement);
+    const cssDom = css3dRenderer.domElement;
+    cssDom.classList.add('css3Renderer');
+    containerDom.appendChild(cssDom);
+  }
+  /**
+   * @description 初始化相机
+   */
+  function initCamera() {
+    camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
+    camera.position.set(0, 0, 5);
+    camera.lookAt(0, 0, 0);
+    window.camera = camera;
+  }
+  /**
+   * @description 初始化场景
+   */
+  function initScene() {
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x020924);
+    scene.fog = new THREE.Fog(0x020924, 200, 1000);
+    window.scene = scene;
+  }
+  function initAxes() {
+    axes = new THREE.AxesHelper();
+    scene.add(axes);
+  }
+  /**
+   * 初始化用户交互
+   **/
+  function initControls() {
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.enableZoom = true;
+    controls.autoRotate = false;
+    controls.autoRotateSpeed = 2;
+    controls.enablePan = true;
+  }
+  /**
+   * @description 初始化光
+   */
+  function initLight() {
+    const ambientLight = new THREE.AmbientLight(0xcccccc, 1.1);
+    scene.add(ambientLight);
+    var directionalLight = new THREE.DirectionalLight(0xffffff, 0.2);
+    directionalLight.position.set(1, 0.1, 0).normalize();
+    var directionalLight2 = new THREE.DirectionalLight(0xff2ffff, 0.2);
+    directionalLight2.position.set(1, 0.1, 0.1).normalize();
+    scene.add(directionalLight);
+    scene.add(directionalLight2);
+    var hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.2);
+    hemiLight.position.set(0, 1, 0);
+    scene.add(hemiLight);
+    var directionalLight = new THREE.DirectionalLight(0xffffff);
+    directionalLight.position.set(1, 500, - 20);
+    directionalLight.castShadow = true;
+    directionalLight.shadow.camera.top = 18;
+    directionalLight.shadow.camera.bottom = - 10;
+    directionalLight.shadow.camera.left = - 52;
+    directionalLight.shadow.camera.right = 12;
+    scene.add(directionalLight);
+  }
+  /**
+   * 窗口变动
+   **/
+  function onWindowResize() {
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+    renders();
+  }
+
+  /**
+   * @description 渲染
+   */
+  function renders() {
+    renderer.clear();
+    renderer.render(scene, camera);
+    css3dRenderer.render(scene, camera);
+  }
+
+  /**
+   * 更新
+   **/
+  function animate() {
+    const angel = camera?.rotation;
+    const o2 = new THREE.Vector3(angel.x, angel.y, angel.z);
+    const rayLine = new THREE.Ray(new THREE.Vector3(0, 0, 0), o2);
+    const o3 = rayLine.at(0.8, new THREE.Vector3(0, 0, 0));
+    lineGeometry?.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0, o3.x, o3.y, o3.z], 3))
+    window.requestAnimationFrame(() => {
+      if (controls) controls.update();
+      renders();
+      animate();
+    });
+  }
+
+  function init() {
+    const p1 = new THREE.Vector3(1, 0, 0);
+    const p2 = new THREE.Vector3(0, -1, 0);
+    const p3 = new THREE.Vector3(0, 1, 0);
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute([p1.x, p1.y, p1.z, p2.x, p2.y, p2.z, p3.x, p3.y, p3.z], 3));
+    const material = new THREE.LineBasicMaterial({
+      color: 0xff00ff,
+      side: THREE.DoubleSide,
+    });
+    const mesh = new THREE.Mesh(geometry, material);
+    scene.add(mesh);
+
+    [p1, p2, p3].forEach((p, index) => {
+      const span = document.createElement('span');
+      span.className = 'span';
+      span.style.color = '#fff';
+      span.innerText = `p${index + 1}`;
+      const object = new CSS3DSprite(span);
+      object.position.set(p.x, p.y, p.z);
+      object.scale.set(0.01, 0.01, 0.01);
+      object.lookAt(0, 0, 0);
+      scene.add(object);
+    })
+
+    // 向量减法
+    const v1 = p1.clone().sub(p2);
+    const v2 = p1.clone().sub(p3);
+    const v3 = p2.clone().sub(p3);
+    // 向量的模厂
+    console.log(v1.length());
+    // console.log(v3.angleTo(v1) * 180 / Math.PI);
+    // console.log(p1.clone().distanceTo(p2.clone()));
+
+
+
+    const o1 = new THREE.Vector3(0, 0, 0);
+    const angel = camera?.rotation;
+    const o2 = new THREE.Vector3(angel.x, angel.y, angel.z);
+
+    const rayLine = new THREE.Ray(o1, o2);
+    const o3 = rayLine.at(0.1, new THREE.Vector3(0, 0, 0));
+
+    lineGeometry = new THREE.BufferGeometry();
+    lineGeometry.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0, o3.x, o3.y, o3.z], 3));
+    const lineMaterial = new THREE.MeshBasicMaterial({
+      side: THREE.DoubleSide,
+      color: 0x00ffff,
+    })
+    const line = new THREE.Line(lineGeometry, lineMaterial);
+    scene.add(line);
+
+
+    [v1, v2, v3, o3.clone()].forEach((p, index) => {
+      const span = document.createElement('span');
+      span.className = 'span';
+      span.style.color = '#fff';
+      span.innerText = `v${index + 1}`;
+      const object = new CSS3DSprite(span);
+      object.position.set(p.x, p.y, p.z);
+      object.scale.set(0.01, 0.01, 0.01);
+      object.lookAt(0, 0, 0);
+      scene.add(object);
+    })
+    // console.log(v1, v2);
+    // console.log(v3.dot(v2));
+
+
+    // // 计算余弦
+    const cos = v1.dot(v3) / (v1.length() * v3.length());
+    // console.log(cos);
+    console.log(Math.acos(cos) * 180 / Math.PI);
+  }
+
+  window.onload = () => {
+    initRenderer();
+    initCamera();
+    initScene();
+    initLight();
+    initAxes();
+    initControls();
+    animate();
+    init();
+    window.addEventListener('resize', onWindowResize, false);
+  };
+</script>
+
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    html,
+    body {
+      padding: 0;
+      margin: 0;
+      position: relative;
+    }
+
+    #btn {
+      position: fixed;
+      top: 20px;
+      right: 100px;
+    }
+  </style>
+</head>
+
+<body>
+  <button id="btn">切换</button>
+  <div id="container"></div>
+</body>
+<script src="./../node_modules/axios/dist/axios.js"></script>
+<script type="module">
+  import TWEEN from "/node_modules/@tweenjs/tween.js/dist/tween.esm.js";
+  import * as d3 from "https://cdn.skypack.dev/d3@7";
+  import * as THREE from '/node_modules/three/build/three.module.js';
+  import { OrbitControls } from '/node_modules/three/examples/jsm/controls/OrbitControls.js'
+
+  let scene, renderer, camera, light, orbitControls;
+  // 切换场景
+  let type = 0;
+
+  document.addEventListener('DOMContentLoaded', function () {
+    init();
+    animate();
+    addEarth();
+  })
+
+  function addEarth() {
+    const projection = d3
+      .geoMercator()
+      .center([116.23, 39.54])
+      .scale(0.001)
+      .translate([0, 0]);
+    axios.get('./assets/popular.json')
+      .then(res => {
+        const polygon = res.data;
+        const geometry = new THREE.BufferGeometry();
+
+        const pxyz_arr = [];
+        const pxyz_arr1 = [];
+        const colors = [];
+
+        const shape = new THREE.Shape();
+
+        for (let i = 0; i < polygon.length; i++) {
+          const pcoor = polygon[i];
+          const pxyz = cartographicToXYZ(pcoor[0], pcoor[1]);
+          pxyz_arr.push(pxyz.x, pxyz.y, pxyz.z);
+
+          const pxyz1 = projection(pcoor);
+          pxyz_arr1.push(pcoor[0], pcoor[1], 0);
+        }
+
+        // 平面坐标
+        const vertices1 = new Float32Array(pxyz_arr1);
+
+        const vertices0 = new Float32Array(pxyz_arr);
+
+        geometry.setAttribute('position', new THREE.BufferAttribute(type === 1 ? vertices1 : vertices0, 3));
+
+        const material = new THREE.PointsMaterial({
+          color: '#C5C5C4',
+          size: 1 * 0.1,
+          side: THREE.DoubleSide,
+        });
+
+        const point = new THREE.Points(geometry, material);
+        point.lookAt(new THREE.Vector3(0, 0, 0));
+
+        scene.add(point);
+
+        document.getElementById('btn').onclick = function () {
+          type = type === 1 ? 0 : 1;
+          console.log(type);
+          const startPositions = point.geometry.getAttribute('position');
+          const destPosition = new THREE.BufferAttribute(type === 1 ? vertices1 : vertices0, 3);
+
+          for (let i = 0; i < startPositions.array.length; i++) {
+            const tween = new TWEEN.Tween(startPositions.array);
+            tween.to({
+              [i]: destPosition.array[i] * (type === 1 ? 0.1 : 1),
+            }, 1000);
+            tween.easing(TWEEN.Easing.Exponential.In);
+            tween.start();
+
+            tween.onUpdate(() => {
+              point.geometry.attributes.position.needsUpdate = true;
+            });
+
+          }
+        }
+      })
+  }
+
+  function init() {
+    const container = document.getElementById('container');
+    container.setAttribute('style', `
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      height: 100vh;
+      background-color: #EEEEEE;
+    `)
+    renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true,
+    });
+    renderer.setSize(container.offsetWidth, container.offsetHeight);
+    container.appendChild(renderer.domElement);
+    renderer.setClearColor(0x000000)
+
+    scene = new THREE.Scene();
+    const axesHelper = new THREE.AxesHelper(20);
+    scene.add(axesHelper);
+
+    camera = new THREE.PerspectiveCamera(45, container.offsetWidth / container.offsetHeight, 1, 10000);
+    camera.position.set(0, 0, 31);
+    camera.lookAt({ x: 0, y: 0, z: 0 });
+
+    light = new THREE.AmbientLight(0xFFFFFF);
+    light.position.set(100, 100, 200);
+    scene.add(light);
+
+    orbitControls = new OrbitControls(camera, renderer.domElement);
+    orbitControls.enableDamping = true;
+    orbitControls.zoomSpeed = 1;
+    renderer.clear();
+  }
+
+  function render() {
+    renderer.render(scene, camera);
+  }
+
+  function animate() {
+    TWEEN.update();
+    render();
+    requestAnimationFrame(animate);
+  }
+
+  function cartographicToXYZ(lat, lng, alt = 0) {
+    let lat_degree = THREE.Math.degToRad(lat);
+    let lng_degree = THREE.Math.degToRad(lng);
+
+    let distance = (6371.393 + alt) * 0.001;
+    let projectionDist = distance * Math.cos(lng_degree);
+
+    let point = new THREE.Vector3();
+    point.x = projectionDist * Math.sin(lat_degree);
+    point.y = distance * Math.sin(lng_degree);
+    point.z = projectionDist * Math.cos(lat_degree);
+
+    return point;
+  }
+</script>
+
+</html>

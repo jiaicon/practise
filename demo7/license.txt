@@ -1,0 +1,11 @@
+Model Information:
+* title:	PUBG Mobile : Helicopter
+* source:	https://sketchfab.com/3d-models/pubg-mobile-helicopter-ca50da4d25de4123a6689fc58efa2880
+* author:	Falah (https://sketchfab.com/falah01)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "PUBG Mobile : Helicopter" (https://sketchfab.com/3d-models/pubg-mobile-helicopter-ca50da4d25de4123a6689fc58efa2880) by Falah (https://sketchfab.com/falah01) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

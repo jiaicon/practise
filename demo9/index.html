@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GLSL 着色器</title>
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    #container {
+      width: 100%;
+      height: 100%;
+      background-color: #000;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container"></div>
+</body>
+<script type="module">
+  import {
+    Scene,
+    PerspectiveCamera,
+    WebGLRenderer,
+    SphereGeometry,
+    MeshBasicMaterial,
+    Mesh,
+    DirectionalLight,
+    TextureLoader,
+    DoubleSide,
+    ShaderMaterial,
+    PlaneGeometry,
+    Vector2,
+    Vector3,
+  } from './../node_modules/three/build/three.module.js';
+  import { OrbitControls } from './../node_modules/three/examples/jsm/controls/OrbitControls.js';
+
+  let renderer,
+    scene,
+    camera,
+    light,
+    orbitControls;
+  const GLOBAL_WIDTH = window.innerWidth;
+  const GLOBAL_HEIGHT = window.innerHeight;
+  const container = document.getElementById('container');
+  const textureLoader = new TextureLoader();
+
+  scene = new Scene();
+  renderer = new WebGLRenderer({
+    antialias: true,
+    alpha: true,
+  })
+  renderer.setSize(GLOBAL_WIDTH, GLOBAL_HEIGHT);
+  container.appendChild(renderer.domElement);
+
+  camera = new PerspectiveCamera(45, GLOBAL_WIDTH / GLOBAL_HEIGHT, 1, 10);
+  camera.position.set(0, 0, 5);
+  camera.lookAt(0, 0, 0);
+
+  orbitControls = new OrbitControls(camera, renderer.domElement);
+  orbitControls.enableDamping = true;
+  orbitControls.zoomSpeed = 1;
+
+  light = new DirectionalLight(0xffffff, 1);
+  scene.add(light);
+
+  const geomatery1 = new PlaneGeometry(1, 1);
+  let value = 0, ratio = { type: 'f', value: 1 };
+  const iChannel0 = textureLoader.load('./earth.jpg');
+  const iChannel1 = textureLoader.load('./earth.jpg');
+  const material1 = new ShaderMaterial({
+    // map: textureLoader.load('./earth.jpg'),
+    side: DoubleSide,
+    transparent: true,
+    depthWrite: false,
+    uniforms: {
+      uTime: ratio,
+      iResolution: {
+        type: 'v2',
+        value: new Vector2(1, 1),
+      },
+      iChannel0: {
+        value: iChannel0,
+      },
+      iChannel1: {
+        value: iChannel1,
+      },
+    },
+    vertexShader: `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: `
+      precision mediump float;
+      uniform vec2 vUv;
+      uniform vec2 iResolution;
+      uniform float uTime;
+
+      vec3 palette(float d){
+        return mix(vec3(0.2,0.7,0.9),vec3(1.,0.,1.),d);
+      }
+
+      vec2 rotate(vec2 p,float a){
+        float c = cos(a);
+        float s = sin(a);
+        return p*mat2(c,s,-s,c);
+      }
+
+      float map(vec3 p){
+        for( int i = 0; i<8; ++i){
+          float t = uTime*0.2;
+          p.xz =rotate(p.xz,t);
+          p.xy =rotate(p.xy,t*1.89);
+          p.xz = abs(p.xz);
+          p.xz-=.5;
+        }
+        return dot(sign(p),p)/5.;
+      }
+
+      vec4 rm (vec3 ro, vec3 rd){
+        float t = 0.;
+        vec3 col = vec3(0.);
+        float d;
+        for(float i =0.; i<64.; i++){
+        vec3 p = ro + rd*t;
+          d = map(p)*.5;
+          if(d<0.02){
+            break;
+          }
+          if(d>100.){
+            break;
+          }
+          //col+=vec3(0.6,0.8,0.8)/(400.*(d));
+          col+=palette(length(p)*.1)/(400.*(d));
+          t+=d;
+        }
+        return vec4(col,1./(d*100.));
+      }
+      void main() {
+        vec2 uv = (vUv-(iResolution.xy/2.))/iResolution.x;
+        vec3 ro = vec3(0.,0.,-50.);
+        ro.xz = rotate(ro.xz,uTime);
+        vec3 cf = normalize(-ro);
+        vec3 cs = normalize(cross(cf,vec3(0.,1.,0.)));
+        vec3 cu = normalize(cross(cf,cs));
+        
+        vec3 uuv = ro+cf*3. + uv.x*cs + uv.y*cu;
+        
+        vec3 rd = normalize(uuv-ro);
+        
+        vec4 col = rm(ro,rd);
+        gl_FragColor = col;
+      }
+    `
+  })
+  const mesh1 = new Mesh(geomatery1, material1);
+  mesh1.userData.created_at = Date.now();
+  scene.add(mesh1);
+
+  function animate() {
+    ratio.value = (Date.now() - mesh1.userData.created_at) / 1000;
+    renderer.render(scene, camera);
+    requestAnimationFrame(animate);
+  }
+  animate();
+</script>
+
+</html>
